@@ -10,6 +10,8 @@ from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
 from datetime import datetime, timedelta, timezone
 from requests.auth import HTTPBasicAuth
+from collections import Counter
+from itertools import repeat, chain
 
 
 # User Register View
@@ -167,20 +169,21 @@ class CreateListCollectionsView(GenericAPIView):
                 if not movie.genres == '':
                     movies_list.extend(movie.genres.split(","))
 
-        from collections import Counter
-        from itertools import repeat, chain
+        
         result = list(chain.from_iterable(repeat(i, c) for i, c in Counter(movies_list).most_common()))
         result = list(set(result))
         if len(result) > 3:
             result = result[:3]
 
         collection_data = {'count' : count,
-                'collections' : serializer.data}
+                'collections' : serializer.data,
+                'favourite_genres': result
+                }
         return Response(data={"status": status.HTTP_200_OK,
                                 "detail": "My Collections list.",
                                 "is_success": True,
                                 'data':collection_data,
-                                'favourite_genres': result},
+                                },
                         status=status.HTTP_200_OK)
 
 
